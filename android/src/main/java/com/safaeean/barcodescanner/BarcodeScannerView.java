@@ -19,6 +19,10 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.multi.GenericMultipleBarcodeReader;
+import com.google.zxing.multi.MultipleBarcodeReader;
+import com.google.zxing.multi.qrcode.QRCodeMultiReader;
+import java.util.Arrays;
 
 public class BarcodeScannerView extends FrameLayout implements Camera.PreviewCallback {
     private CameraPreview mPreview;
@@ -82,31 +86,17 @@ public class BarcodeScannerView extends FrameLayout implements Camera.PreviewCal
 
             if (source != null) {
                 BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                try {
-                    rawResult = mMultiFormatReader.decodeWithState(bitmap);
-                } catch (ReaderException re) {
-                    // continue
-                } catch (NullPointerException npe) {
-                    // This is terrible
-                } catch (ArrayIndexOutOfBoundsException aoe) {
-
-                } finally {
-                    mMultiFormatReader.reset();
+                MultipleBarcodeReader reader = new QRCodeMultiReader();
+                Result[] results = reader.decodeMultiple(bitmap);
+                if (results.length != 0) {
+                    WritableMap event = Arguments.createMap();
+                    event.putString("data", Arrays.toString(results));
+                    ReactContext reactContext = (ReactContext)getContext();
+                    reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                            getId(),
+                            "topChange",
+                            event);
                 }
-            }
-
-            final Result finalRawResult = rawResult;
-
-            if (finalRawResult != null) {
-                Log.i(TAG, finalRawResult.getText());
-                WritableMap event = Arguments.createMap();
-                event.putString("data", finalRawResult.getText());
-                event.putString("type", finalRawResult.getBarcodeFormat().toString());
-                ReactContext reactContext = (ReactContext)getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-                        getId(),
-                        "topChange",
-                        event);
             }
         } catch(Exception e) {
             // TODO: Terrible hack. It is possible that this method is invoked after camera is released.
