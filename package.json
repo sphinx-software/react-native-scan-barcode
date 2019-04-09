@@ -9,7 +9,7 @@
     "type": "tag",
     "registry": true,
     "raw": "react-native-scan-barcode",
-    "name": "react-native-scan-barcode",
+    "name": "@sphinx-softeare/react-native-scan-multi-barcode",
     "escapedName": "react-native-scan-barcode",
     "rawSpec": "",
     "saveSpec": null,
@@ -53,5 +53,5 @@
     "type": "git",
     "url": "git+https://github.com/safaeean/react-native-scan-barcode.git"
   },
-  "version": "3.1.5"
+  "version": "1.0.0"
 }
